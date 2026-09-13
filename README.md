@@ -1,71 +1,79 @@
-# PhishGuard
-PhishGuard — Smart Link Protection for SMS &amp; Social Media
+# PhishGuard — Smart Link Protection for SMS, DMs & OS Integrations
 
 > **Stop the scam before the click.**
 
-PhishGuard is a mobile-first, hyper-local security engine designed to detect zero-day phishing links across SMS and social media DMs (WhatsApp, Instagram, Facebook, TikTok). Unlike traditional caller-ID lookup services that rely on stale phone number databases, PhishGuard inspects the **destination URL and infrastructure metadata** in real time—stopping attackers using fresh burner SIMs before users interact with malicious links.
+PhishGuard is a mobile-first, hyper-local security engine built to detect zero-day phishing links across SMS, social media DMs (WhatsApp, Instagram, Facebook, TikTok), and system-wide device vectors. Unlike traditional caller-ID tools that rely on stale phone number databases, PhishGuard inspects the **destination URL and infrastructure metadata** in real time—catching attackers using fresh burner SIMs before users interact with malicious links.
 
 ---
 
 ## The Problem
 
-In South Africa and across emerging mobile markets, digital fraud has migrated from traditional email to mobile messaging channels. Citizens are targeted daily by deceptive links delivered via two primary vectors:
+In South Africa and emerging mobile markets, digital fraud has migrated from traditional email to mobile messaging channels. Citizens are targeted daily by deceptive links across multiple vectors:
 
 1. **SMS & Banking Scams:** Messages impersonating high-trust institutions (e.g., *"SARS refund available"*, *"FNB account suspended"*, *"PostNet package delivery failed"*).
 2. **Social Media Impersonation:** Fake security alerts in DMs (e.g., *"Your Instagram account will be deleted"*, *"Facebook copyright violation"*, *"Is this you in this video?"*).
+3. **System-Wide & Physical Vectors:** Malicious links copied to the clipboard, deceptive push notifications, links embedded in PDFs/emails, and tampered QR code stickers (*"Quishing"*).
 
 ### Why Existing Solutions Fail
 
-Traditional anti-spam solutions like Truecaller rely on **sender-based reporting**. Attackers easily bypass this by rotating cheap SIM cards, VoIP gateways, and burner accounts daily. By the time a phone number is reported and flagged, thousands of users have already clicked. Furthermore, existing tools are blind inside social media DMs, fail to analyze outbound link destinations, and offer black-box blocking without teaching users *why* a link is dangerous.
+Traditional anti-spam solutions rely on **sender-based reporting**. Attackers easily bypass this by rotating cheap SIM cards, VoIP gateways, and burner accounts daily. By the time a phone number is reported and flagged, thousands of users have already clicked. Furthermore, existing tools are blind inside social media DMs, fail to analyze outbound link destinations, and offer black-box blocking without teaching users *why* a link is dangerous.
 
 ---
 
 ## The Solution
 
-**PhishGuard** shifts the security paradigm from **WHO sent the message** to **WHERE the link goes**. By analyzing destination URLs the moment they are generated, PhishGuard catches zero-day scam domains on day zero—before global threat databases or caller-ID registries update.
+**PhishGuard** shifts the security paradigm from **WHO sent the message** to **WHERE the link goes**. By analyzing destination URLs the moment they are generated or encountered across the OS, PhishGuard catches zero-day scam domains on day zero—before global threat databases or caller-ID registries update.
 
 ### Core Capabilities
 
 * **Destination-First Analysis:** Evaluates domain registration age (WHOIS), SSL certificate metadata, and multi-hop shortlink redirects (`bit.ly`, `tinyurl.com`).
 * **Typosquatting & Lookalike Detection:** Uses Levenshtein distance matching against an authoritative registry of South African institutions (`sars.gov.za`, `fnb.co.za`, `capitecbank.co.za`, `postnet.co.za`).
-* **Dual Inspection Modes:** Dedicated heuristic pipelines for **Bank/SMS Mode** (financial scams) and **Social Media Mode** (credential harvesting & fake login pages).
-* **Clear, Educational Output:** Returns a simple **GREEN (Safe)**, **YELLOW (Caution)**, or **RED (Phishing)** status paired with 2–3 plain-language explanations and immediate actionable advice.
+* **Multi-Vector Ingestion Layer:** Dedicated heuristic pipelines for **Bank/SMS Mode**, **Social Media Mode**, **System Clipboard Monitoring**, and **QR Code Scanning**.
+* **Clear, Educational Output:** Returns a simple **GREEN (Safe)**, **YELLOW (Caution)**, or **RED (Phishing)** status paired with plain-language explanations and immediate actionable advice.
 
 ---
 
 ## Key Features
 
 * **Real-Time URL Resolution:** Traces obfuscated links through all redirect layers to expose final landing destinations.
+* **System-Wide Auto-Detection:** Automatically inspects links copied to the clipboard, intercepted via QR code scans, or tapped within external applications.
 * **3-Tier Risk Rating:** Replaces technical jargon with easy-to-understand explanations that build long-term digital literacy.
-* **AI-Powered Inspection Pipeline:** Combines fast lexical ML feature classification, headless vision analysis for visual clone detection, and lightweight LLMs for human-readable risk breakdowns.
+* **AI-Powered Inspection Pipeline:** Combines fast lexical ML feature classification, headless vision analysis for visual clone detection, and lightweight LLMs for context-aware risk breakdowns.
 
 ---
 
-## Project Architecture
+## System Architecture
 
 ```
-                       [ Incoming URL / Message ]
-                                   │
-                                   ▼
-          ┌─────────────────────────────────────────────────┐
-          │         Phase 1: Unroll & Resolve               │
-          │     (Shortlink Unrolling & HTTP Tracing)        │
-          └─────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-          ┌─────────────────────────────────────────────────┐
-          │      Phase 2: Lexical & Metadata Rules          │
-          │   (Levenshtein Distance, WHOIS Age, SSL Certs)  │
-          └─────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-          ┌─────────────────────────────────────────────────┐
-          │        Phase 3: AI Explanation Pipeline          │
-          │    (Visual Clone Matching & Plain-English Output)│
-          └─────────────────────────────────────────────────┘
-                                   │
-                                   ▼
-               [ GREEN Safe | YELLOW Caution | RED Phishing ]
+                               ┌─────────────────────────────────────────────────┐
+                               │                 INGESTION LAYER                 │
+                               ├──────────────┬────────────────┬─────────────────┤
+                               │ Android SMS  │ System         │ QR Code         │
+                               │ Listener     │ Clipboard      │ Camera Scanner  │
+                               └──────┬───────┴────────┬───────┴────────┬────────┘
+                                      │                │                │
+                                      └────────────────┼────────────────┘
+                                                       │
+                                                       ▼
+                               ┌─────────────────────────────────────────────────┐
+                               │           Phase 1: Unroll & Resolve             │
+                               │     (Shortlink Unrolling & HTTP Tracing)        │
+                               └─────────────────────────────────────────────────┘
+                                                       │
+                                                       ▼
+                               ┌─────────────────────────────────────────────────┐
+                               │        Phase 2: Lexical & Metadata Rules        │
+                               │   (Levenshtein Distance, WHOIS Age, SSL Certs)  │
+                               └─────────────────────────────────────────────────┘
+                                                       │
+                                                       ▼
+                               ┌─────────────────────────────────────────────────┐
+                               │         Phase 3: AI Explanation Pipeline        │
+                               │    (Visual Clone Matching & Contextual LLM)     │
+                               └─────────────────────────────────────────────────┘
+                                                       │
+                                                       ▼
+                                  [ GREEN Safe | YELLOW Caution | RED Phishing ]
 
 ```
 
@@ -76,8 +84,8 @@ Traditional anti-spam solutions like Truecaller rely on **sender-based reporting
 * **Core Backend Engine:** Python 3.11+, FastAPI
 * **Heuristics & String Matching:** `Levenshtein`, `tldextract`, `python-whois`
 * **Headless Visual Inspector:** Playwright (Python)
-* **AI & Machine Learning:** LightGBM (Lexical), Vector Embeddings (Visual Matching), Small Language Models (Explanation Engine)
-* **Frontend Web App:** Next.js, Tailwind CSS
+* **AI & Machine Learning:** LightGBM (Lexical), Vector Embeddings (Visual Matching), Small Language Models (Contextual Explanations)
+* **Frontend & Mobile Layer:** Next.js, Tailwind CSS, Android Native (Kotlin/Java)
 
 ---
 
@@ -140,7 +148,8 @@ The web client will be running on `http://localhost:3000` and connecting to the 
 ```json
 {
   "url": "http://sars-gov-za-refund.co.za/login",
-  "source_context": "sms"
+  "source": "clipboard",
+  "raw_message_text": "Click here to claim your SARS refund of R3,500."
 }
 
 ```
@@ -155,7 +164,7 @@ The web client will be running on `http://localhost:3000` and connecting to the 
   "reasons": [
     "Domain 'sars-gov-za-refund.co.za' was created 2 days ago.",
     "Calculated lookalike distance against official 'sars.gov.za' domain.",
-    "Contains deceptive path parameters ('/refund') paired with urgent call-to-action."
+    "The link copied to your clipboard mimics SARS, but resolves to an offshore IP address."
   ],
   "recommended_action": "Do not enter your credentials or banking details. Delete the message immediately."
 }
@@ -166,10 +175,15 @@ The web client will be running on `http://localhost:3000` and connecting to the 
 
 ## Development Roadmap
 
-* [x] **Phase 1 (Current):** Web Engine & Rule Pipeline (Domain age, similarity distance, shortlink resolution).
-* [ ] **Phase 2:** Android Background SMS Listener and OS Share-Sheet Integration for WhatsApp/Social DMs.
-* [ ] **Phase 3:** On-device quantized model execution (TFLite) for low-latency background scanning.
-* [ ] **Phase 4:** B2B Brand Protection API & Registrar Automated Takedown Reporting.
+* [x] **Phase 1 (Core Engine):** Web App & Rule Pipeline (Domain age, similarity distance, shortlink resolution).
+* [ ] **Phase 2 (Social & SMS):** Android Background SMS Listener and OS Share-Sheet Integration for WhatsApp/Social DMs.
+* [ ] **Phase 3 (System-Wide Protection):**
+* Background Clipboard Monitor (Auto-scan on link copy).
+* QR Code / "Quishing" Camera Scanner.
+* System-wide OS URL Handler for Email & PDF links.
+
+
+* [ ] **Phase 4 (Enterprise):** On-device TFLite execution & B2B Brand Protection Takedown API.
 
 ---
 
